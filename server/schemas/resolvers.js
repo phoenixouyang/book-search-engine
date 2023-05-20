@@ -8,7 +8,7 @@ const resolvers = {
       if (context.user) {
         return User.findOne({ _id: context.user._id }).select('-__v -password')
       }
-      throw new AuthenticationError('Please log in!');
+      throw new AuthenticationError('Please log in to view this content.');
     },
   },
 
@@ -35,37 +35,28 @@ const resolvers = {
       const token = signToken(user);
       return { token, user };
     },
-    saveBook: async (parent, { thoughtText }, context) => {
+    saveBook: async (parent, { newBook }, context) => {
       if (context.user) {
-        const thought = await Thought.create({
-          thoughtText,
-          thoughtAuthor: context.user.username,
-        });
-
-        await User.findOneAndUpdate(
+        const updatedUser = await User.findOneAndUpdate(
           { _id: context.user._id },
-          { $addToSet: { thoughts: thought._id } }
+          { $addToSet: { savedBooks: newBook }},
+          { new: true }
         );
 
-        return thought;
+        return updatedUser;
       }
-      throw new AuthenticationError('You need to be logged in!');
+      throw new AuthenticationError('Please log in to view this content.');
     },
-    removeBook: async (parent, { thoughtId }, context) => {
+    removeBook: async (parent, { bookId }, context) => {
       if (context.user) {
-        const book = await Thought.findOneAndDelete({
-          _id: thoughtId,
-          thoughtAuthor: context.user.username,
-        });
-
-        await User.findOneAndUpdate(
+        const updatedUser = await User.findOneAndUpdate(
           { _id: context.user._id },
-          { $pull: { thoughts: thought._id } }
+          { $pull: { savedBooks: bookId }},
+          { new: true }
         );
-
-        return thought;
+        return updatedUser;
       }
-      throw new AuthenticationError('You need to be logged in!');
+      throw new AuthenticationError('Please log in to view this content.');
     },
   },
 };
