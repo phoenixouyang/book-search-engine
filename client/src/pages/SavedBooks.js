@@ -29,8 +29,8 @@ const SavedBooks = () => {
     }
 
     try {
-      const response = await removeBook({ variables: { bookId }});
-        console.log(`Book as been deleted: ${response}`);
+      const response = await removeBook({ variables: { bookId } });
+        console.log('Deleted record: ', response);
         if (error) {
           console.error(error);
         }
